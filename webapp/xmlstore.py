@@ -13,6 +13,14 @@ class Parsefile(webapp2.RequestHandler):
 		for atype in e.xpath('//currency'):
 			subfields = atype.getchildren()
 			curr = Currency()
+			# Searching existing values and deleting them
+			for subfield in subfields:
+				key = ndb.Key(Currency, subfield.tag)
+				vals = Currency.query(ancestor=key)
+				for ent in vals:
+					ent.value = subfield.text
+					ent.key.delete()
+			# Inserting new values
 			for subfield in subfields:
 				currkey = ndb.Key(Currency, subfield.tag)
 				curr = Currency(value=subfield.text, parent=currkey)
